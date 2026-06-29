@@ -24,6 +24,10 @@ export const db = {
       if (error) throw error
       return data
     },
+    async atualizar(id, campos) {
+      const { error } = await supabase.from('reservas').update(campos).eq('id', id)
+      if (error) throw error
+    },
     async remover(id) {
       const { error } = await supabase.from('reservas').delete().eq('id', id)
       if (error) throw error

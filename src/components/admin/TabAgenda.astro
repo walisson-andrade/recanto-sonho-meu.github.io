@@ -41,10 +41,11 @@
   <!-- Modal Nova Reserva -->
   <div id="modal-reserva" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden">
     <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <h3 class="font-display text-xl font-bold text-verde mb-4">Nova Reserva</h3>
+      <h3 id="modal-reserva-title" class="font-display text-xl font-bold text-verde mb-4">Nova Reserva</h3>
       <p id="modal-reserva-data" class="text-sm text-gray-500 mb-4"></p>
 
       <form id="form-reserva" class="space-y-4">
+        <input type="hidden" id="reserva-id" />
         <input type="hidden" id="reserva-data" />
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
@@ -89,8 +90,8 @@
           <textarea id="reserva-obs" rows="2" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-verde resize-none"></textarea>
         </div>
         <label class="flex items-center gap-2">
-          <input type="checkbox" id="reserva-enviar-email" class="accent-verde" />
-          <span class="text-sm text-gray-600">Enviar email de confirmação ao cliente</span>
+          <input type="checkbox" id="reserva-enviar-whatsapp" class="accent-verde" />
+          <span class="text-sm text-gray-600">Enviar confirmação via WhatsApp</span>
         </label>
 
         <div class="flex gap-3 pt-2">
@@ -108,6 +109,7 @@
       <div id="detalhes-content" class="space-y-2 text-sm text-gray-600 mb-6"></div>
       <div class="flex gap-3">
         <button id="modal-detalhes-close" class="flex-1 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">Fechar</button>
+        <button id="modal-detalhes-edit" class="flex-1 py-2 rounded-lg bg-verde text-white font-semibold hover:bg-verde-claro">Editar</button>
         <button id="modal-detalhes-remove" class="flex-1 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600">Remover</button>
       </div>
     </div>
@@ -116,7 +118,7 @@
 
 <script>
   import { db, supabase } from '../../lib/supabase.js'
-  import { nomeMes, dataParaISO, formatarData, formatarPreco, diaSemana, esc } from '../../lib/helpers.js'
+  import { nomeMes, dataParaISO, formatarData, formatarPreco, diaSemana, esc, formatarWhatsApp } from '../../lib/helpers.js'
 
   let reservas = []
   let admBaseMonth = new Date().getMonth()
@@ -197,7 +199,8 @@
         <td class="px-4 py-3 text-xs">${Array.isArray(pacotes) ? pacotes.map(p => p.nome || p).join(', ') : '—'}</td>
         <td class="px-4 py-3">
           <div class="flex gap-1">
-            ${r.cliente_email ? `<button onclick="window.reenviarEmail('${r.id}')" class="p-1 hover:bg-blue-50 rounded text-blue-500" title="Reenviar email">📧</button>` : ''}
+            <button onclick="window.editarReserva('${r.id}')" class="p-1 hover:bg-blue-50 rounded text-blue-500" title="Editar">✏️</button>
+            ${r.cliente_whatsapp ? `<button onclick="window.enviarWhatsApp('${r.id}')" class="p-1 hover:bg-green-50 rounded text-green-500" title="Enviar WhatsApp">💬</button>` : ''}
             <button onclick="window.removerReserva('${r.id}')" class="p-1 hover:bg-red-50 rounded text-red-500" title="Remover">🗑️</button>
           </div>
         </td>
@@ -220,15 +223,39 @@
         <p><strong>Valor:</strong> ${reserva.valor_total ? formatarPreco(reserva.valor_total) : '—'}</p>
         <p><strong>Observações:</strong> ${esc(reserva.observacoes) || '—'}</p>
       `
+      document.getElementById('modal-detalhes-edit').onclick = () => {
+        document.getElementById('modal-detalhes').classList.add('hidden')
+        window.editarReserva(reserva.id)
+      }
       document.getElementById('modal-detalhes-remove').onclick = () => window.removerReserva(reserva.id)
       document.getElementById('modal-detalhes').classList.remove('hidden')
     } else {
-      document.getElementById('reserva-data').value = iso
-      document.getElementById('modal-reserva-data').textContent = `Data: ${formatarData(iso)} (${diaSemana(iso)})`
       document.getElementById('form-reserva').reset()
+      document.getElementById('reserva-id').value = ''
       document.getElementById('reserva-data').value = iso
+      document.getElementById('modal-reserva-title').textContent = 'Nova Reserva'
+      document.getElementById('modal-reserva-data').textContent = `Data: ${formatarData(iso)} (${diaSemana(iso)})`
       document.getElementById('modal-reserva').classList.remove('hidden')
     }
+  }
+
+  window.editarReserva = function(id) {
+    const r = reservas.find(x => x.id === id)
+    if (!r) return
+    document.getElementById('form-reserva').reset()
+    document.getElementById('reserva-id').value = r.id
+    document.getElementById('reserva-data').value = r.data
+    document.getElementById('reserva-titulo').value = r.titulo || ''
+    document.getElementById('reserva-nome').value = r.cliente_nome || ''
+    document.getElementById('reserva-whatsapp').value = r.cliente_whatsapp || ''
+    document.getElementById('reserva-email').value = r.cliente_email || ''
+    document.getElementById('reserva-tipo').value = r.tipo_evento || ''
+    document.getElementById('reserva-convidados').value = r.num_convidados || ''
+    document.getElementById('reserva-valor').value = r.valor_total || ''
+    document.getElementById('reserva-obs').value = r.observacoes || ''
+    document.getElementById('modal-reserva-title').textContent = 'Editar Reserva'
+    document.getElementById('modal-reserva-data').textContent = `Data: ${formatarData(r.data)} (${diaSemana(r.data)})`
+    document.getElementById('modal-reserva').classList.remove('hidden')
   }
 
   document.getElementById('modal-reserva-cancel').addEventListener('click', () => {
@@ -254,16 +281,27 @@
         observacoes: document.getElementById('reserva-obs').value || null,
       }
 
-      const novaReserva = await db.reservas.adicionar(reserva)
+      const editId = document.getElementById('reserva-id').value
+      let savedId
 
-      if (document.getElementById('reserva-enviar-email').checked && reserva.cliente_email) {
-        await supabase.functions.invoke('notify-reserva', {
-          body: { reserva_id: novaReserva.id, enviar_cliente: true }
-        })
+      if (editId) {
+        await db.reservas.atualizar(editId, reserva)
+        savedId = editId
+      } else {
+        const novaReserva = await db.reservas.adicionar(reserva)
+        savedId = novaReserva.id
       }
 
       document.getElementById('modal-reserva').classList.add('hidden')
-      window.showToast('✅ Reserva adicionada!')
+      window.showToast(editId ? '✅ Reserva atualizada!' : '✅ Reserva adicionada!')
+
+      if (document.getElementById('reserva-enviar-whatsapp').checked && reserva.cliente_whatsapp) {
+        const dataFmt = formatarData(reserva.data)
+        const diaFmt = diaSemana(reserva.data)
+        const valorFmt = reserva.valor_total ? formatarPreco(reserva.valor_total) : 'a combinar'
+        const msg = `Ola ${reserva.cliente_nome || ''}! Sua reserva no Recanto Sonho Meu esta confirmada.\n\nData: ${dataFmt} (${diaFmt})\nEvento: ${reserva.tipo_evento || 'A definir'}\nConvidados: ${reserva.num_convidados || 'A definir'}\nValor: ${valorFmt}\n\nQualquer duvida estamos a disposicao!`
+        window.open(`https://wa.me/${formatarWhatsApp(reserva.cliente_whatsapp)}?text=${encodeURIComponent(msg)}`, '_blank')
+      }
       await loadAgenda()
     } catch (err) {
       window.showToast('❌ Erro ao salvar reserva', false)
@@ -282,15 +320,14 @@
     }
   }
 
-  window.reenviarEmail = async function(id) {
-    try {
-      await supabase.functions.invoke('notify-reserva', {
-        body: { reserva_id: id, enviar_cliente: true }
-      })
-      window.showToast('✅ Email reenviado!')
-    } catch {
-      window.showToast('❌ Erro ao reenviar email', false)
-    }
+  window.enviarWhatsApp = function(id) {
+    const r = reservas.find(x => x.id === id)
+    if (!r || !r.cliente_whatsapp) return
+    const dataFmt = formatarData(r.data)
+    const diaFmt = diaSemana(r.data)
+    const valorFmt = r.valor_total ? formatarPreco(r.valor_total) : 'a combinar'
+    const msg = `Ola ${r.cliente_nome || ''}! Sua reserva no Recanto Sonho Meu esta confirmada.\n\nData: ${dataFmt} (${diaFmt})\nEvento: ${r.tipo_evento || 'A definir'}\nConvidados: ${r.num_convidados || 'A definir'}\nValor: ${valorFmt}\n\nQualquer duvida estamos a disposicao!`
+    window.open(`https://wa.me/${formatarWhatsApp(r.cliente_whatsapp)}?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   document.getElementById('adm-agenda-prev').addEventListener('click', () => {

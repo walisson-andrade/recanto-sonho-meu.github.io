@@ -75,6 +75,13 @@ export function dataParaISO(date) {
   return `${y}-${m}-${d}`
 }
 
+export function formatarWhatsApp(num) {
+  if (!num) return ''
+  const digits = num.replace(/\D/g, '')
+  if (digits.startsWith('55')) return digits
+  return '55' + digits
+}
+
 export function esc(str) {
   if (!str) return ''
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')

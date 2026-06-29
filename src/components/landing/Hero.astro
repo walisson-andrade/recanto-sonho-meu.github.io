@@ -60,7 +60,7 @@
 
 <script>
   import { db } from '../../lib/supabase.js'
-  import { formatarDataExtenso } from '../../lib/helpers.js'
+  import { formatarDataExtenso, dataParaISO } from '../../lib/helpers.js'
 
   async function carregarProximaData() {
     try {
@@ -71,7 +71,7 @@
       for (let i = 1; i <= 90; i++) {
         const d = new Date(hoje)
         d.setDate(d.getDate() + i)
-        const iso = d.toISOString().split('T')[0]
+        const iso = dataParaISO(d)
         if (!datasReservadas.has(iso)) {
           document.getElementById('hero-pill-text').textContent =
             `Próxima data disponível: ${formatarDataExtenso(iso)}`
