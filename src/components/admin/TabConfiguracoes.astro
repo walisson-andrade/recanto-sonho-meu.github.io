@@ -1,5 +1,4 @@
 <div class="admin-tab-panel hidden" data-tab="configuracoes">
-  <h2 class="text-2xl font-bold text-verde mb-6">⚙️ Configurações</h2>
 
   <div class="space-y-8">
     <!-- Configurações gerais -->
@@ -64,9 +63,6 @@
         <div class="flex gap-3">
           <button id="cfg-salvar" class="bg-verde text-white px-6 py-2 rounded-lg font-semibold hover:bg-verde-claro">
             Salvar configurações
-          </button>
-          <button id="cfg-teste-email" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-200">
-            Enviar email de teste
           </button>
         </div>
       </div>
@@ -161,27 +157,6 @@
       window.showToast('✅ Configurações salvas!')
     } catch {
       window.showToast('❌ Erro ao salvar', false)
-    }
-  })
-
-  document.getElementById('cfg-teste-email').addEventListener('click', async () => {
-    try {
-      const emailAdmin = document.getElementById('cfg-email').value
-      if (!emailAdmin) { window.showToast('❌ Preencha o email da dona', false); return }
-      await supabase.functions.invoke('notify-lead', {
-        body: {
-          nome: 'Teste',
-          email: 'teste@teste.com',
-          whatsapp: '00000000000',
-          tipo_evento: 'Teste',
-          data_desejada: new Date().toISOString().split('T')[0],
-          num_convidados: '10',
-          mensagem: 'Este é um email de teste do painel admin.'
-        }
-      })
-      window.showToast('✅ Email de teste enviado!')
-    } catch {
-      window.showToast('❌ Erro ao enviar email', false)
     }
   })
 

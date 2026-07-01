@@ -1,6 +1,5 @@
 <div class="admin-tab-panel hidden" data-tab="depoimentos">
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-verde">💬 Depoimentos</h2>
+  <div class="flex justify-end mb-6">
     <button id="add-depoimento-btn" class="bg-verde text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-verde-claro">
       + Adicionar
     </button>
@@ -70,6 +69,7 @@
 
 <script>
   import { db } from '../../lib/supabase.js'
+  import { esc } from '../../lib/helpers.js'
 
   let depoimentos = []
 
@@ -88,9 +88,9 @@
     }
     tbody.innerHTML = depoimentos.map(d => `
       <tr class="border-t border-gray-50 hover:bg-gray-50">
-        <td class="px-4 py-3 font-medium">${d.nome}</td>
-        <td class="px-4 py-3 text-xs text-gray-500">${d.tipo_evento || '—'}</td>
-        <td class="px-4 py-3 text-xs text-gray-600 max-w-xs truncate">${d.texto}</td>
+        <td class="px-4 py-3 font-medium">${esc(d.nome)}</td>
+        <td class="px-4 py-3 text-xs text-gray-500">${esc(d.tipo_evento) || '—'}</td>
+        <td class="px-4 py-3 text-xs text-gray-600 max-w-xs truncate">${esc(d.texto)}</td>
         <td class="px-4 py-3 text-dourado">${'★'.repeat(d.avaliacao)}</td>
         <td class="px-4 py-3">
           <button onclick="window.toggleDepoimento('${d.id}', ${!d.aprovado})"

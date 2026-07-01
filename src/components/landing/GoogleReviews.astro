@@ -29,13 +29,20 @@
         return
       }
 
-      const divMatch = widgetCode.match(/<div[^>]*>[\s\S]*?<\/div>/) || widgetCode.match(/<div[^>]*\/>/)
-      if (divMatch) {
-        container.innerHTML = divMatch[0]
-      }
-
+      const ALLOWED_HOSTS = ['apps.elfsight.com', 'static.elfsight.com', 'elfsight.com']
       const scriptMatch = widgetCode.match(/src="([^"]+)"/)
+
       if (scriptMatch) {
+        let srcHost
+        try { srcHost = new URL(scriptMatch[1]).hostname } catch { return }
+        if (!ALLOWED_HOSTS.some(h => srcHost === h || srcHost.endsWith('.' + h))) {
+          document.getElementById('google-reviews').style.display = 'none'
+          return
+        }
+        const divMatch = widgetCode.match(/<div[^>]*>[\s\S]*?<\/div>/) || widgetCode.match(/<div[^>]*\/>/)
+        if (divMatch) {
+          container.innerHTML = divMatch[0]
+        }
         const existingScript = document.querySelector(`script[src="${scriptMatch[1]}"]`)
         if (!existingScript) {
           const script = document.createElement('script')
@@ -44,7 +51,7 @@
           document.body.appendChild(script)
         }
       } else {
-        container.innerHTML = widgetCode.replace(/<script[\s\S]*?<\/script>/gi, '')
+        document.getElementById('google-reviews').style.display = 'none'
       }
     } catch {
       document.getElementById('google-reviews').style.display = 'none'

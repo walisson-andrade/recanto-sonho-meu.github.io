@@ -33,20 +33,21 @@ import Base from './Base.astro'
 
     <!-- Layout principal do admin -->
     <div id="admin-layout" class="hidden">
-      <!-- Sidebar mobile toggle -->
-      <button id="sidebar-toggle"
-        class="lg:hidden fixed top-4 left-4 z-40 bg-verde text-white p-2 rounded-lg shadow-lg">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+      <!-- Header mobile -->
+      <header class="lg:hidden fixed top-0 left-0 right-0 z-40 bg-verde text-white flex items-center h-14 px-4 shadow-md">
+        <button id="sidebar-toggle" class="p-1 mr-3 shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <span id="mobile-header-title" class="font-semibold text-sm truncate">Agenda</span>
+      </header>
 
       <!-- Sidebar -->
       <aside id="admin-sidebar"
         class="fixed inset-y-0 left-0 z-30 w-64 bg-verde text-white transform -translate-x-full lg:translate-x-0 transition-transform">
         <div class="p-6">
           <h2 class="font-display text-xl font-bold text-white">Recanto <span class="text-champagne">Sonho Meu</span></h2>
-          <p class="text-white/50 text-sm">Painel Admin</p>
         </div>
         <nav class="px-4 space-y-1">
           <button class="admin-tab-btn w-full text-left px-4 py-2.5 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-3 text-sm" data-tab="agenda">
@@ -108,6 +109,8 @@ import Base from './Base.astro'
     const sidebarToggle = document.getElementById('sidebar-toggle')
     const sidebar = document.getElementById('admin-sidebar')
     const tabBtns = document.querySelectorAll('.admin-tab-btn')
+    const mobileHeaderTitle = document.getElementById('mobile-header-title')
+    const tabLabels = { agenda: '📅 Agenda', precos: '💰 Preços', pacotes: '📦 Pacotes', fotos: '📸 Fotos', estrutura: '🏠 Estrutura', depoimentos: '💬 Depoimentos', faq: '❓ FAQ', leads: '📋 Leads', configuracoes: '⚙️ Configurações' }
 
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession()
@@ -160,6 +163,7 @@ import Base from './Base.astro'
       tabPanels.forEach(panel => {
         panel.classList.toggle('hidden', panel.dataset.tab !== tab)
       })
+      if (mobileHeaderTitle) mobileHeaderTitle.textContent = tabLabels[tab] || tab
       sidebar.classList.add('-translate-x-full')
     }
 
