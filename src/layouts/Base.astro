@@ -2,13 +2,15 @@
 interface Props {
   title?: string
   description?: string
+  manifest?: string
 }
 
 import '../styles/global.css';
 
 const {
   title = 'Recanto Sonho Meu - Salão de Festas em Uberlândia, MG',
-  description = 'Espaço para casamentos, festas e confraternizações em Uberlândia, MG. Capacidade para 150 pessoas, piscina, churrasqueira e hospedagem.'
+  description = 'Espaço para casamentos, festas e confraternizações em Uberlândia, MG. Capacidade para 150 pessoas, piscina, churrasqueira e hospedagem.',
+  manifest = '/manifest.json'
 } = Astro.props
 ---
 
@@ -24,7 +26,7 @@ const {
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>" />
 
   <!-- PWA -->
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href={manifest} />
   <meta name="theme-color" content="#2D5016" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
