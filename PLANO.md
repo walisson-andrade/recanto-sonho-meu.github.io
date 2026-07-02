@@ -2,7 +2,7 @@
 
 ## 1. Resumo
 
-Site completo para o salão de festas Recanto Sonho Meu (Uberlândia, GO), composto por uma landing page pública focada em captação de leads via WhatsApp e um painel administrativo protegido por Supabase Auth. Toda a gestão (reservas, preços, fotos, depoimentos, FAQ, estrutura, pacotes e configurações) é feita pelo painel admin. O site é estático (Astro 6), estilizado com Tailwind CSS v4, com dados dinâmicos carregados client-side via Supabase. Deploy via GitHub Pages com GitHub Actions. PWA instalável sem service worker.
+Site completo para o salão de festas Recanto Sonho Meu (Uberlândia, GO), composto por uma landing page pública focada em captação de leads via WhatsApp e um painel administrativo protegido por Supabase Auth. Toda a gestão (reservas, preços, fotos, depoimentos, FAQ, estrutura, pacotes e configurações) é feita pelo painel admin. O site é estático (Astro 6), estilizado com Tailwind CSS v4, com dados dinâmicos carregados client-side via Supabase. Deploy manual via Firebase Hosting (`recantosonhomeu.web.app`). PWA instalável sem service worker.
 
 ---
 
@@ -101,9 +101,8 @@ Antes de rodar o projeto:
 4. **Resend**: criar conta em resend.com e obter API key
 5. **Supabase Edge Functions**: adicionar `RESEND_API_KEY` nas secrets
 6. **Env local**: copiar `.env.example` → `.env` e preencher `PUBLIC_SUPABASE_URL` e `PUBLIC_SUPABASE_ANON_KEY`
-7. **GitHub Secrets**: cadastrar `PUBLIC_SUPABASE_URL` e `PUBLIC_SUPABASE_ANON_KEY` em Settings → Secrets → Actions
-8. **GitHub Pages**: habilitar em Settings → Pages → Source: GitHub Actions
-9. **Docker** (opcional): ter Docker instalado para usar `docker-compose up`
+7. **Firebase Hosting**: `firebase login` + `npm run build && npx firebase deploy --only hosting` pra publicar
+8. **Docker** (opcional): ter Docker instalado para usar `docker-compose up`
 
 ---
 
@@ -173,3 +172,25 @@ nova, verificar se ela tem colunas com dado pessoal de cliente (nome, email,
 telefone, endereço, data de nascimento, mensagens). Se tiver, nunca expor a
 tabela inteira publicamente — criar uma view com só as colunas não-sensíveis,
 ou restringir a policy à role `authenticated`.
+
+### ⚠️ Deploy é só Firebase — sempre manual
+
+O site (`recantosonhomeu.web.app`, projeto Firebase `recanto-sonho-meu-82d3e`,
+config em `firebase.json`/`.firebaserc`) é publicado **manualmente**, com:
+
+```
+npm run build && npx firebase deploy --only hosting
+```
+
+Não existe (nem deve existir) automação via GitHub Actions. Até 2026-07-02 o
+projeto também publicava em paralelo no GitHub Pages via
+`.github/workflows/deploy.yml`; isso foi removido e o GitHub Pages foi
+desativado no repositório, porque os dois hosts divergiam — uma migration de
+banco (Supabase, compartilhado) valia na hora pros dois, mas o código só
+chegava automaticamente no GitHub Pages, deixando o Firebase (o site real)
+rodando código antigo contra regras novas. Isso já quebrou depoimentos, FAQ,
+galeria, estrutura e calculadora em produção até alguém lembrar de rodar o
+deploy manual.
+
+**Toda mudança de código que precise ir pro ar exige rodar o deploy do Firebase
+à mão — `git push` sozinho não publica nada.**

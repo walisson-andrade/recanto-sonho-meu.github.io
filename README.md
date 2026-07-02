@@ -125,8 +125,8 @@ src/
 ### Instalação
 
 ```bash
-git clone https://github.com/walisson-andrade/recanto-sonho-meu.github.io.git
-cd recanto-sonho-meu.github.io
+git clone https://github.com/walisson-andrade/recanto-sonho-meu.git
+cd recanto-sonho-meu
 npm install
 ```
 
@@ -166,14 +166,13 @@ npm run build
 
 ### Firebase Hosting (produção)
 
+Deploy é sempre manual — não há workflow automático. Depois de qualquer
+mudança de código:
+
 ```bash
 npm run build
 firebase deploy --only hosting
 ```
-
-### GitHub Actions
-
-O repositório tem workflow automático (`.github/workflows/deploy.yml`) que faz build e deploy no GitHub Pages a cada push na `main`. Os secrets `PUBLIC_SUPABASE_URL` e `PUBLIC_SUPABASE_ANON_KEY` devem estar configurados no repositório.
 
 ---
 
