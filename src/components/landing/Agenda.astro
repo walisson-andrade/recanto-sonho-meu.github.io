@@ -83,7 +83,7 @@
       ;[precosSemana, datasEspeciais, reservas, config] = await Promise.all([
         db.precos.listar(),
         db.datasEspeciais.listar(),
-        db.reservas.listar(),
+        db.reservas.listarDatas(),
         db.config.listar()
       ])
     } catch { /* fallback sem dados */ }

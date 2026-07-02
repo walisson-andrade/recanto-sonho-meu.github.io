@@ -7,6 +7,16 @@ export const supabase = createClient(supabaseUrl || '', supabaseKey || '')
 
 export const db = {
   reservas: {
+    // Uso público (landing page): só datas ocupadas, sem dados do cliente.
+    async listarDatas() {
+      const { data, error } = await supabase
+        .from('reservas_datas')
+        .select('*')
+        .order('data', { ascending: true })
+      if (error) throw error
+      return data
+    },
+    // Uso admin (autenticado): registro completo, protegido por RLS.
     async listar() {
       const { data, error } = await supabase
         .from('reservas')

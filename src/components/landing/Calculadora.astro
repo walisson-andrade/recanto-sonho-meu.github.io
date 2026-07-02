@@ -151,7 +151,7 @@
       ;[precosSemana, datasEspeciais, reservas, pacotesData, config] = await Promise.all([
         db.precos.listar(),
         db.datasEspeciais.listar(),
-        db.reservas.listar(),
+        db.reservas.listarDatas(),
         db.pacotes.listar(),
         db.config.listar()
       ])

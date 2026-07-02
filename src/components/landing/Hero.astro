@@ -64,7 +64,7 @@
 
   async function carregarProximaData() {
     try {
-      const reservas = await db.reservas.listar()
+      const reservas = await db.reservas.listarDatas()
       const datasReservadas = new Set(reservas.map(r => r.data))
       const hoje = new Date()
 
